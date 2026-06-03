@@ -1,7 +1,9 @@
 import os
+import random
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
+import info
 
 load_dotenv()
 
@@ -14,24 +16,29 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'Logged in as {bot.user}')
 
-@bot.command()
-async def sendMessage(ctx, *, message: str):
-    await ctx.send(message)
+@bot.event
+async def on_member_join(member):
+    channel = discord.utils.get(member.guild.text_channels, name='general')
+    if channel:
+        await channel.send(f'Welcome to {member.guild.name}, {member.mention}!')
 
 @bot.command()
-async def multiPing(ctx, times: int,*, message: str):
+async def serverPing(ctx, times: int,*, message: str):
     for _ in range(times):
         await ctx.send(message)
 
 @bot.command()
-async def userMessage(ctx, member: discord.Member, *, message: str):
-    await member.send(message)
-    await ctx.send(f"Sent a DM to {member.name}!")
-
-@bot.command()
-async def multiUserMessage(ctx, member: discord.Member, times: int, *, message: str):
+async def userPing(ctx, member: discord.Member, times: int, *, message: str):
     await ctx.send(f"Sent a DM to {member.name}!")
     for _ in range(times):
         await member.send(message)
 
-bot.run(os.getenv('DISCORD_TOKEN'))
+@bot.command()
+async def sendPic(ctx, url: str):
+    await ctx.send(url)
+
+@bot.command()
+async def roast(ctx, member: discord.Member):
+    await ctx.send(f"{member.mention}, {random.choice(info.roasts)}")
+
+bot.run(os.getenv('BOT_TOKEN'))
